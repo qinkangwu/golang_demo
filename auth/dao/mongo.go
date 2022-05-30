@@ -2,7 +2,9 @@ package dao
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -18,7 +20,8 @@ func NewMongo(db *mongo.Database) *Mongo {
 }
 
 func (m *Mongo) ResolveAuthId(c context.Context, openId string) (string, error) {
-	m.col.FindOneAndUpdate(c, bson.M{
+	fmt.Printf("openId = %s \n", openId)
+	result := m.col.FindOneAndUpdate(c, bson.M{
 		"open_id": openId,
 	}, bson.M{
 		"$set": bson.M{
@@ -28,5 +31,16 @@ func (m *Mongo) ResolveAuthId(c context.Context, openId string) (string, error) 
 		SetUpsert(true).
 		SetReturnDocument(options.After),
 	)
-	return "", nil
+	if result.Err() != nil {
+		return "", fmt.Errorf("FindOneAndUpdate err:%v", result.Err())
+	}
+
+	var row struct {
+		ID primitive.ObjectID `bson:"_id"`
+	}
+	err := result.Decode(&row)
+	if err != nil {
+		return "", fmt.Errorf("解码失败 err:%v", err)
+	}
+	return row.ID.Hex(), nil
 }
