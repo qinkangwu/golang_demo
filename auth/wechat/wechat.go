@@ -6,5 +6,5 @@ type Service struct {
 }
 
 func (s Service) Resolve(code string) (string, error) {
-	return fmt.Sprintf("123"), nil
+	return fmt.Sprintf("111"), nil
 }
