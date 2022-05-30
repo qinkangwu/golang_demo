@@ -38,7 +38,8 @@ func main() {
 		panic(err2)
 		return
 	}
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
+
 	err3 := cli.ContainerRemove(c, cc.ID, types.ContainerRemoveOptions{
 		Force: true,
 	})
