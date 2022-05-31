@@ -1,8 +1,10 @@
 package token
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"testing"
+	"time"
 )
 
 const publicKey = `-----BEGIN PUBLIC KEY-----
@@ -25,9 +27,16 @@ func TestJWTVerifier_Verify(t *testing.T) {
 	v := &JWTVerifier{
 		PublicKey: publicKeyFromPEM,
 	}
-
-	_, vError := v.Verify(token)
+	jwt.TimeFunc = func() time.Time {
+		return time.Unix(1516239022, 0)
+	}
+	verifyId, vError := v.Verify(token)
+	fmt.Println(verifyId)
 	if vError != nil {
 		t.Errorf("Verify - 错误 %v", vError)
+	}
+	want := "1234567890"
+	if want != verifyId {
+		t.Errorf("断言失败")
 	}
 }
