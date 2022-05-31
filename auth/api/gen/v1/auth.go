@@ -6,16 +6,23 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"server2/auth/dao"
+	"time"
 )
 
 type Service struct {
 	Logger         *zap.Logger
 	OpenIdResolver OpenIdResolver
 	Mongo          *dao.Mongo
+	TokenGen       TokenGen
+	TokenExp       time.Duration
 }
 
 type OpenIdResolver interface {
 	Resolve(code string) (string, error)
+}
+
+type TokenGen interface {
+	GenToken(id string, expIn time.Duration) (string, error)
 }
 
 func (s *Service) Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error) {
@@ -30,9 +37,14 @@ func (s *Service) Login(ctx context.Context, request *LoginRequest) (*LoginRespo
 		s.Logger.Error("获取id失败", zap.Error(err))
 		return nil, status.Error(codes.Internal, "")
 	}
+	token, err := s.TokenGen.GenToken(id, s.TokenExp)
+	if err != nil {
+		s.Logger.Error("生成token失败", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "")
+	}
 	return &LoginResponse{
-		AccessToken: id,
-		ExpiresIn:   7200,
+		AccessToken: token,
+		ExpiresIn:   int32(s.TokenExp.Seconds()),
 	}, nil
 }
 
