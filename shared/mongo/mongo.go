@@ -11,6 +11,12 @@ func Set(v interface{}) bson.M {
 	}
 }
 
+func SetOnInsert(v interface{}) bson.M {
+	return bson.M{
+		"$setOnInsert": v,
+	}
+}
+
 type ObjId struct {
 	ID primitive.ObjectID `bson:"_id"`
 }

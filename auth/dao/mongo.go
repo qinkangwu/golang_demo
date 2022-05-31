@@ -24,17 +24,11 @@ func NewMongo(db *mongo.Database) *Mongo {
 
 func (m *Mongo) ResolveAuthId(c context.Context, openId string) (string, error) {
 	fmt.Printf("openId = %s \n", openId)
-	_, err2 := m.col.InsertOne(c, bson.M{
-		"_id":     m.newObjID(),
-		"open_id": openId,
-	})
-	if err2 != nil {
-		return "", err2
-	}
 	result := m.col.FindOneAndUpdate(c, bson.M{
 		"open_id": openId,
-	}, mgo.Set(bson.M{
+	}, mgo.SetOnInsert(bson.M{
 		"open_id": openId,
+		"_id":     m.newObjID(),
 	}), options.FindOneAndUpdate().
 		SetUpsert(true).
 		SetReturnDocument(options.After),
