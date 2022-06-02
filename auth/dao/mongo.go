@@ -4,21 +4,18 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	mgo "server2/shared/mongo"
 )
 
 type Mongo struct {
-	col      *mongo.Collection
-	newObjID func() primitive.ObjectID
+	col *mongo.Collection
 }
 
 func NewMongo(db *mongo.Database) *Mongo {
 	return &Mongo{
-		col:      db.Collection("auth"),
-		newObjID: primitive.NewObjectID,
+		col: db.Collection("auth"),
 	}
 }
 
@@ -28,7 +25,7 @@ func (m *Mongo) ResolveAuthId(c context.Context, openId string) (string, error) 
 		"open_id": openId,
 	}, mgo.SetOnInsert(bson.M{
 		"open_id": openId,
-		"_id":     m.newObjID(),
+		"_id":     mgo.NewObjID(),
 	}), options.FindOneAndUpdate().
 		SetUpsert(true).
 		SetReturnDocument(options.After),

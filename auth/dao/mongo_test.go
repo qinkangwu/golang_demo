@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
+	mgo "server2/shared/mongo"
 	mongotesting "server2/shared/testing"
 	"testing"
 )
@@ -44,7 +45,7 @@ func TestMongo_ResolveAuthId(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	m.newObjID = func() primitive.ObjectID {
+	mgo.NewObjID = func() primitive.ObjectID {
 		hex := mustObjId("62946a36163e0a8f94c8a54a")
 		return hex
 	}
