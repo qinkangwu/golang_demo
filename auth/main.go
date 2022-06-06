@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	authpb "server2/auth/api/gen/v1"
+	"server2/auth/api/service"
 	"server2/auth/dao"
 	"server2/auth/token"
 	"server2/auth/wechat"
@@ -58,7 +59,7 @@ func main() {
 		return
 	}
 	server := grpc.NewServer()
-	authpb.RegisterAuthServiceServer(server, &authpb.Service{
+	authpb.RegisterAuthServiceServer(server, &service.Service{
 		Logger:         dLog,
 		OpenIdResolver: &wechat.Service{},
 		Mongo:          dao.NewMongo(mongoConnect.Database("serverDemo")),

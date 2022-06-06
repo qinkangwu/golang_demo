@@ -1,10 +1,11 @@
-package authpb
+package service
 
 import (
 	"context"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"server2/auth/api/gen/v1"
 	"server2/auth/dao"
 	"time"
 )
@@ -15,6 +16,7 @@ type Service struct {
 	Mongo          *dao.Mongo
 	TokenGen       TokenGen
 	TokenExp       time.Duration
+	authpb.UnimplementedAuthServiceServer
 }
 
 type OpenIdResolver interface {
@@ -25,7 +27,7 @@ type TokenGen interface {
 	GenToken(id string, expIn time.Duration) (string, error)
 }
 
-func (s *Service) Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error) {
+func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	r, err := s.OpenIdResolver.Resolve(request.Code)
 	if err != nil {
 		s.Logger.Error("登录失败", zap.Error(err))
@@ -42,12 +44,8 @@ func (s *Service) Login(ctx context.Context, request *LoginRequest) (*LoginRespo
 		s.Logger.Error("生成token失败", zap.Error(err))
 		return nil, status.Error(codes.PermissionDenied, "")
 	}
-	return &LoginResponse{
+	return &authpb.LoginResponse{
 		AccessToken: token,
 		ExpiresIn:   int32(s.TokenExp.Seconds()),
 	}, nil
-}
-
-func (s *Service) mustEmbedUnimplementedAuthServiceServer() {
-	return
 }
