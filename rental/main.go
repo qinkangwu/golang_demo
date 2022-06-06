@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	rentalpb "server2/rental/api/gen/v1"
+	"server2/rental/trip/client"
 	"server2/rental/trip/dao"
 	"server2/shared/auth"
 )
@@ -33,8 +34,11 @@ func main() {
 	}
 	server := grpc.NewServer(grpc.UnaryInterceptor(in))
 	rentalpb.RegisterTripServiceServer(server, &rentalpb.Service{
-		Logger: dLog,
-		Mongo:  dao.NewMongo(mongoConnect.Database("serverDemo")),
+		Logger:         dLog,
+		Mongo:          dao.NewMongo(mongoConnect.Database("serverDemo")),
+		ProfileManager: &client.ProfileManager{},
+		CarManager:     &client.CarManager{},
+		PoiManager:     &client.PoiManager{},
 	})
 
 	err3 := server.Serve(listen)

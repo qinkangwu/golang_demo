@@ -86,7 +86,7 @@ func (m Mongo) UpdateTrip(c context.Context, tId string, userId string, updatedA
 	if fromIdErr != nil {
 		return fromIdErr
 	}
-	_, updateErr := m.col.UpdateOne(c, bson.M{
+	res, updateErr := m.col.UpdateOne(c, bson.M{
 		"_id":         objectID,
 		"trip.userid": userId,
 		"updateat":    updatedAt,
@@ -97,5 +97,8 @@ func (m Mongo) UpdateTrip(c context.Context, tId string, userId string, updatedA
 	if updateErr != nil {
 		return updateErr
 	}
-	return updateErr
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
 }

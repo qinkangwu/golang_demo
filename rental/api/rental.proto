@@ -32,15 +32,12 @@ message Trip {
   LocationStatus current = 4;
   LocationStatus end = 5;
   TripStatus status = 6;
+  string identityId = 7;
 }
 
 message CreateTripRequest {
   Location start = 1;
   string car_id = 2;
-}
-
-message CreateTripResponse {
-  TripEntity trip = 1;
 }
 
 message GetTripRequest {
@@ -73,14 +70,14 @@ message GetTripsRequest{
   TripStatus status = 1;
 }
 
-message GetTripResponses {
+message GetTripsResponses {
   repeated TripEntity trips = 1;
 }
 
 service TripService {
-  rpc CreateTrip(CreateTripRequest) returns (CreateTripResponse);
+  rpc CreateTrip(CreateTripRequest) returns (TripEntity);
   rpc GetTrip(GetTripRequest) returns (GetTripResponse);
-  rpc GetTrips(GetTripsRequest)returns(GetTripResponses);
+  rpc GetTrips(GetTripsRequest)returns(GetTripsResponses);
   rpc UpdateTrip(UpdateTripRequest) returns (UpdateTripResponse);
   rpc DelTrip(DelTripRequest) returns (DelTripResponse);
 }

@@ -10,8 +10,11 @@ import (
 )
 
 type Service struct {
-	Logger *zap.Logger
-	Mongo  *dao.Mongo
+	Logger         *zap.Logger
+	Mongo          *dao.Mongo
+	ProfileManager ProfileManager
+	CarManager     CarManager
+	PoiManager     PoiManager
 }
 
 func (s *Service) GetTrip(ctx context.Context, request *GetTripRequest) (*GetTripResponse, error) {
@@ -19,7 +22,7 @@ func (s *Service) GetTrip(ctx context.Context, request *GetTripRequest) (*GetTri
 	panic("implement me")
 }
 
-func (s *Service) GetTrips(ctx context.Context, request *GetTripsRequest) (*GetTripResponses, error) {
+func (s *Service) GetTrips(ctx context.Context, request *GetTripsRequest) (*GetTripsResponses, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -52,13 +55,71 @@ func (s *Service) DelTrip(ctx context.Context, request *DelTripRequest) (*DelTri
 	panic("implement me")
 }
 
-func (s *Service) CreateTrip(ctx context.Context, request *CreateTripRequest) (*CreateTripResponse, error) {
+type ProfileManager interface {
+	Verify(ctx context.Context, userId string) (string, error)
+}
+
+type CarManager interface {
+	Verify(ctx context.Context, carId string, location *Location) error
+	Unlock(ctx context.Context, carId string) error
+}
+
+type PoiManager interface {
+	GetPoiName(l *Location) (string, error)
+}
+
+func (s *Service) CreateTrip(ctx context.Context, request *CreateTripRequest) (*TripEntity, error) {
 	userId, err := auth.UserIdFromContext(ctx)
-	s.Logger.Info("hello world", zap.String("userId", userId))
 	if err != nil {
 		return nil, err
 	}
-	return nil, status.Error(codes.Unimplemented, "还没有实现")
+	s.Logger.Info("hello world", zap.String("userId", userId))
+	identityId, verifyErr := s.ProfileManager.Verify(ctx, userId)
+	if verifyErr != nil {
+		return nil, status.Error(codes.FailedPrecondition, verifyErr.Error())
+	}
+	carVerifyErr := s.CarManager.Verify(ctx, request.CarId, request.Start)
+	if carVerifyErr != nil {
+		return nil, status.Error(codes.FailedPrecondition, carVerifyErr.Error())
+	}
+
+	poiName, getPoiNameErr := s.PoiManager.GetPoiName(request.Start)
+	if getPoiNameErr != nil {
+		s.Logger.Info("没有找到行程locationDesc", zap.Stringer("location", request.Start))
+	}
+
+	createTrip, createTripErr := s.Mongo.CreateTrip(ctx, &Trip{
+		UserId: userId,
+		CarId:  request.CarId,
+		Start: &LocationStatus{
+			Location:     request.Start,
+			FeeCent:      0,
+			KmDriven:     0,
+			LocationDesc: poiName,
+		},
+		Current: &LocationStatus{
+			Location:     request.Start,
+			FeeCent:      0,
+			KmDriven:     0,
+			LocationDesc: poiName,
+		},
+		End:        nil,
+		Status:     TripStatus_IN_PROGRESS,
+		IdentityId: identityId,
+	})
+	if createTripErr != nil {
+		return nil, status.Error(codes.AlreadyExists, createTripErr.Error())
+	}
+	go func(c context.Context, carId string) {
+		err := s.CarManager.Unlock(c, carId)
+		if err != nil {
+			s.Logger.Error("车辆开锁失败", zap.Error(err))
+		}
+	}(context.Background(), createTrip.Trip.CarId)
+	return &TripEntity{
+		Id:   createTrip.ID.Hex(),
+		Trip: createTrip.Trip,
+	}, nil
 }
 
 func (s *Service) mustEmbedUnimplementedTripServiceServer() {

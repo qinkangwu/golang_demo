@@ -22,9 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TripServiceClient interface {
-	CreateTrip(ctx context.Context, in *CreateTripRequest, opts ...grpc.CallOption) (*CreateTripResponse, error)
+	CreateTrip(ctx context.Context, in *CreateTripRequest, opts ...grpc.CallOption) (*TripEntity, error)
 	GetTrip(ctx context.Context, in *GetTripRequest, opts ...grpc.CallOption) (*GetTripResponse, error)
-	GetTrips(ctx context.Context, in *GetTripsRequest, opts ...grpc.CallOption) (*GetTripResponses, error)
+	GetTrips(ctx context.Context, in *GetTripsRequest, opts ...grpc.CallOption) (*GetTripsResponses, error)
 	UpdateTrip(ctx context.Context, in *UpdateTripRequest, opts ...grpc.CallOption) (*UpdateTripResponse, error)
 	DelTrip(ctx context.Context, in *DelTripRequest, opts ...grpc.CallOption) (*DelTripResponse, error)
 }
@@ -37,8 +37,8 @@ func NewTripServiceClient(cc grpc.ClientConnInterface) TripServiceClient {
 	return &tripServiceClient{cc}
 }
 
-func (c *tripServiceClient) CreateTrip(ctx context.Context, in *CreateTripRequest, opts ...grpc.CallOption) (*CreateTripResponse, error) {
-	out := new(CreateTripResponse)
+func (c *tripServiceClient) CreateTrip(ctx context.Context, in *CreateTripRequest, opts ...grpc.CallOption) (*TripEntity, error) {
+	out := new(TripEntity)
 	err := c.cc.Invoke(ctx, "/rental.v1.TripService/CreateTrip", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func (c *tripServiceClient) GetTrip(ctx context.Context, in *GetTripRequest, opt
 	return out, nil
 }
 
-func (c *tripServiceClient) GetTrips(ctx context.Context, in *GetTripsRequest, opts ...grpc.CallOption) (*GetTripResponses, error) {
-	out := new(GetTripResponses)
+func (c *tripServiceClient) GetTrips(ctx context.Context, in *GetTripsRequest, opts ...grpc.CallOption) (*GetTripsResponses, error) {
+	out := new(GetTripsResponses)
 	err := c.cc.Invoke(ctx, "/rental.v1.TripService/GetTrips", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -86,9 +86,9 @@ func (c *tripServiceClient) DelTrip(ctx context.Context, in *DelTripRequest, opt
 // All implementations must embed UnimplementedTripServiceServer
 // for forward compatibility
 type TripServiceServer interface {
-	CreateTrip(context.Context, *CreateTripRequest) (*CreateTripResponse, error)
+	CreateTrip(context.Context, *CreateTripRequest) (*TripEntity, error)
 	GetTrip(context.Context, *GetTripRequest) (*GetTripResponse, error)
-	GetTrips(context.Context, *GetTripsRequest) (*GetTripResponses, error)
+	GetTrips(context.Context, *GetTripsRequest) (*GetTripsResponses, error)
 	UpdateTrip(context.Context, *UpdateTripRequest) (*UpdateTripResponse, error)
 	DelTrip(context.Context, *DelTripRequest) (*DelTripResponse, error)
 	mustEmbedUnimplementedTripServiceServer()
@@ -98,13 +98,13 @@ type TripServiceServer interface {
 type UnimplementedTripServiceServer struct {
 }
 
-func (UnimplementedTripServiceServer) CreateTrip(context.Context, *CreateTripRequest) (*CreateTripResponse, error) {
+func (UnimplementedTripServiceServer) CreateTrip(context.Context, *CreateTripRequest) (*TripEntity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTrip not implemented")
 }
 func (UnimplementedTripServiceServer) GetTrip(context.Context, *GetTripRequest) (*GetTripResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrip not implemented")
 }
-func (UnimplementedTripServiceServer) GetTrips(context.Context, *GetTripsRequest) (*GetTripResponses, error) {
+func (UnimplementedTripServiceServer) GetTrips(context.Context, *GetTripsRequest) (*GetTripsResponses, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrips not implemented")
 }
 func (UnimplementedTripServiceServer) UpdateTrip(context.Context, *UpdateTripRequest) (*UpdateTripResponse, error) {
