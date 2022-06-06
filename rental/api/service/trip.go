@@ -171,10 +171,12 @@ func nowFunc() int64 {
 }
 func (s Service) calcCurrentStatus(last *rentalpb.LocationStatus, cur *rentalpb.Location) *rentalpb.LocationStatus {
 	esc := float64(nowFunc() - last.TimestampSec)
+	now := nowFunc()
 	return &rentalpb.LocationStatus{
 		Location:     cur,
 		FeeCent:      last.FeeCent + int32(esc*centsPerSec),
 		KmDriven:     12,
 		LocationDesc: "秦家坝",
+		TimestampSec: now,
 	}
 }
