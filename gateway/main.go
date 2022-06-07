@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/namsral/flag"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -13,7 +14,12 @@ import (
 	rentalpb "server2/rental/api/gen/v1"
 )
 
+var addr = flag.String("addr", ":8090", "gateway监听的端口")
+var authAddr = flag.String("auth_addr", ":8088", "auth监听的端口")
+var rentalAddr = flag.String("rental_addr", ":8089", "rental监听的端口")
+
 func main() {
+	flag.Parse()
 	dLog, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatalln("创建日志实例失败")
@@ -34,7 +40,7 @@ func main() {
 	err2 := authpb.RegisterAuthServiceHandlerFromEndpoint(
 		c,
 		mux,
-		":8088",
+		*authAddr,
 		[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if err2 != nil {
 		dLog.Fatal("网关创建错误", zap.Error(err2))
@@ -43,13 +49,13 @@ func main() {
 	err2 = rentalpb.RegisterTripServiceHandlerFromEndpoint(
 		c,
 		mux,
-		":8089",
+		*rentalAddr,
 		[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if err2 != nil {
 		dLog.Fatal("网关创建错误", zap.Error(err2))
 		return
 	}
-	err3 := http.ListenAndServe(":8090", mux)
+	err3 := http.ListenAndServe(*addr, mux)
 	if err3 != nil {
 		dLog.Fatal("网关监听错误", zap.Error(err3))
 		return

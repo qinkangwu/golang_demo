@@ -25,6 +25,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/namsral/flag v1.7.4-pre // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect

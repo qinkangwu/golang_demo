@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/namsral/flag"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -19,24 +20,29 @@ import (
 	"time"
 )
 
+var addr = flag.String("addr", ":8088", "auth监听的端口")
+var mongoUri = flag.String("mongo_uri", "mongodb://admin:123456@127.0.0.1:27017", "mongodb地址")
+var privateKeyFile = flag.String("private_key_file_path", "auth/private.key", "jwt签名privateKey文件地址")
+
 func main() {
+	flag.Parse()
 	dLog, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatalln("创建日志实例失败")
 		return
 	}
-	listen, err2 := net.Listen("tcp", ":8088")
+	listen, err2 := net.Listen("tcp", *addr)
 	if err2 != nil {
 		dLog.Fatal("tcp连接创建失败", zap.Error(err))
 		return
 	}
 	c := context.Background()
-	mongoConnect, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://admin:123456@127.0.0.1:27017"))
+	mongoConnect, err := mongo.Connect(c, options.Client().ApplyURI(*mongoUri))
 	if err != nil {
 		dLog.Fatal("mongo连接失败", zap.Error(err))
 		return
 	}
-	file, osOpenErr := os.Open("auth/private.key")
+	file, osOpenErr := os.Open(*privateKeyFile)
 	if osOpenErr != nil {
 		dLog.Fatal("打开private.key文件失败", zap.Error(err))
 		return
