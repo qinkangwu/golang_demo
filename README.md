@@ -1,5 +1,10 @@
 ## dockerfile build 命令
-``docker build -t qkw -f ../dev/gateway/Dockerfile .``
+```shell
+DOMAIN=$1
+DOCKERIMAGENAME=$2
+cd ../server2
+docker build -t $DOCKERIMAGENAME -f ../dev/$DOMAIN/Dockerfile .
+```
 
 ## dockerfile 内容
 ```dockerfile
