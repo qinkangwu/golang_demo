@@ -11,13 +11,13 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct
 COPY . /go/src/Demo/server2
 
 WORKDIR /go/src/Demo/server2
-RUN CGO_ENABLED=0 GOOS=linux go install ./auth/...
+RUN CGO_ENABLED=0 GOOS=linux go install ./rental/...
 
 FROM alpine:3.15
 
-COPY --from=builder /go/bin/auth /bin/auth
+COPY --from=builder /go/bin/rental /bin/rental
+ENV ADDR=:8081
+EXPOSE 8081
 
-EXPOSE 8088
-
-ENTRYPOINT ["/bin/auth"]
+ENTRYPOINT ["/bin/rental"]
 ```
