@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/namsral/flag"
 	"go.uber.org/zap"
@@ -55,7 +56,14 @@ func main() {
 		dLog.Fatal("网关创建错误", zap.Error(err2))
 		return
 	}
-	err3 := http.ListenAndServe(*addr, mux)
+	http.HandleFunc("/healthz", func(writer http.ResponseWriter, request *http.Request) {
+		_, err := writer.Write([]byte("OK"))
+		if err != nil {
+			_ = fmt.Errorf("服务器错误")
+		}
+	})
+	http.Handle("/", mux)
+	err3 := http.ListenAndServe(*addr, nil)
 	if err3 != nil {
 		dLog.Fatal("网关监听错误", zap.Error(err3))
 		return

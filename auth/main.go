@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/namsral/flag"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,6 +27,7 @@ var privateKeyFile = flag.String("private_key_file_path", "auth/private.key", "j
 
 func main() {
 	flag.Parse()
+	fmt.Printf("mongoUri: %s", *mongoUri)
 	dLog, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatalln("创建日志实例失败")
