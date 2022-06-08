@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"io/ioutil"
 	"log"
 	"net"
@@ -74,6 +76,8 @@ func main() {
 		TokenExp:       time.Second * 7000,
 		TokenGen:       token.NewJWTTokenGen("qkw123", pemKey),
 	})
+
+	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 
 	err3 := server.Serve(listen)
 	if err3 != nil {

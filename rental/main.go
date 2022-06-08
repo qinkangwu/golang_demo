@@ -7,6 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
 	"net"
 	rentalpb "server2/rental/api/gen/v1"
@@ -47,6 +49,8 @@ func main() {
 		CarManager:     &client.CarManager{},
 		PoiManager:     &client.PoiManager{},
 	})
+
+	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 
 	err3 := server.Serve(listen)
 	if err3 != nil {
