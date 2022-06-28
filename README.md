@@ -26,3 +26,14 @@ EXPOSE 8081
 
 ENTRYPOINT ["/bin/rental"]
 ```
+
+```shell
+docker run -d --restart always --name prometheus -p 9190:9090 -v /Users/qinkangwu/goStudy/prometheus.yml:/etc/prometheus/prometheus.yml -v /Users/qinkangwu/goStudy/rules/target.yml:/etc/prometheus/rules/target.yml  prom/prometheus
+
+
+docker run --name alertmanager -d -p 0.0.0.0:9093:9093 quay.io/prometheus/alertmanager 
+
+docker run -d -p 3000:3000 --name=grafana -v /Users/qinkangwu/prometheus-data/grafana-storage/:/var/lib/grafana grafana/grafana  
+
+docker run -d -p 9100:9100 -v "/proc:/host/proc:ro" -v "/sys:/host/sys:ro" -v "/:/rootfs:ro" prom/node-exporter  
+```
